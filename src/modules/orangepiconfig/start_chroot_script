@@ -57,8 +57,13 @@ fi
 # install avahi so ratos.local works
 check_install_pkgs avahi
 
-#add the same groups as the biqu user
-usermod -a -G disk,audio,plugdev,games,users,systemd-journal,input,netdev,ssh "${BASE_USER}"
+#add the same groups as the biqu user (only those present on this image;
+#the Armbian Trixie minimal image has no 'ssh' group, unlike the CB1 image)
+for grp in disk audio plugdev games users systemd-journal input netdev ssh; do
+  if getent group "${grp}" >/dev/null; then
+    usermod -a -G "${grp}" "${BASE_USER}"
+  fi
+done
 
 #make sure /etc/board-release exists
 if [ ! -e /etc/board-release ]
