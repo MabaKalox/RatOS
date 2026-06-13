@@ -29,14 +29,14 @@ groupadd -f --system spi
 usermod -a -G spi "${BASE_USER}"
 
 # for armbian images
-if [[ "$BASE_DISTRO" == "armbian" ]]
+if [[ "${BASE_DISTRO}" == "armbian" ]]
 then
-  echo "overlays=spi-spidev1
-  param_spidev_spi_bus=1" >> /boot/armbianEnv.txt
+  echo "overlays=spi-spidev1" >> /boot/armbianEnv.txt
+  echo "param_spidev_spi_bus=1" >> /boot/armbianEnv.txt
 else
   # for orangepi os images
-  echo "overlays=spi-spidev1
-  param_spidev_spi_bus=1" >> orangepiEnv.txt
+  echo "overlays=spi-spidev1" >> /boot/orangepiEnv.txt
+  echo "param_spidev_spi_bus=1" >> /boot/orangepiEnv.txt
 fi
 
 echo "spidev" >> /etc/modules
@@ -61,8 +61,12 @@ check_install_pkgs avahi
 usermod -a -G disk,audio,plugdev,games,users,systemd-journal,input,netdev,ssh "${BASE_USER}"
 
 #make sure /etc/board-release exists
-if [ ! -f /etc/board-release ]
+if [ ! -e /etc/board-release ]
 then
-  #using the orange pi os image which doesn't have /etc/board-release but has /etc/orangepi-release
-  ln -s /etc/orangepi-release /etc/board-release
+  #armbian images expose /etc/armbian-release, orange pi os images expose /etc/orangepi-release
+  if [[ "${BASE_DISTRO}" == "armbian" ]] && [ -f /etc/armbian-release ]; then
+    ln -s /etc/armbian-release /etc/board-release
+  elif [ -f /etc/orangepi-release ]; then
+    ln -s /etc/orangepi-release /etc/board-release
+  fi
 fi
