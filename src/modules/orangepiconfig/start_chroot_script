@@ -54,8 +54,9 @@ if [[ -f "${PICONFIG_SWAP_CONF_FILE}" ]]; then
     sed -i 's/^#CONF_MAXSWAP.*/'CONF_MAXSWAP="${PICONFIG_SWAP_MAX}"'/' "${PICONFIG_SWAP_CONF_FILE}"
 fi
 
-# install avahi so ratos.local works
-check_install_pkgs avahi
+# install avahi so ratos.local works (package is avahi-daemon; the bare
+# "avahi" name does not exist and silently skips on Armbian minimal)
+check_install_pkgs avahi-daemon
 
 #add the same groups as the biqu user (only those present on this image;
 #the Armbian Trixie minimal image has no 'ssh' group, unlike the CB1 image)
