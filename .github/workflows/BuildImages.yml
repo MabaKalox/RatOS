@@ -45,7 +45,10 @@ jobs:
 
   build:
     needs: setup
-    runs-on: ubuntu-latest
+    # Native arm64 runner: building the aarch64 image without qemu emulation,
+    # so setuid sudo works inside the chroot (installers like moonraker's
+    # self-elevate with sudo, which qemu-user emulation does not honor).
+    runs-on: ubuntu-24.04-arm
     strategy:
       fail-fast: false
       matrix:
