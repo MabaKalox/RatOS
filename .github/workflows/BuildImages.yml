@@ -45,15 +45,21 @@ jobs:
 
   build:
     needs: setup
-    # Native arm64 runner: building the aarch64 image without qemu emulation,
-    # so setuid sudo works inside the chroot (installers like moonraker's
-    # self-elevate with sudo, which qemu-user emulation does not honor).
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         config: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
+      # Re-register qemu-user-static binfmt handlers with the credential (C)
+      # flag so the setuid bit is honored inside the emulated aarch64 chroot.
+      # Without this, installers that self-elevate (moonraker's
+      # install-moonraker.sh calling "sudo apt-get") fail under emulation with
+      # "effective uid is not 0 ... nosuid". Trixie's newer sudo trips this
+      # where the older Debian images upstream builds do not.
+      - name: Register qemu binfmt (credential flag)
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+
       - name: Cache aptitude
         uses: actions/cache@v4
         with:
